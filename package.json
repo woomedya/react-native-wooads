@@ -1,0 +1,29 @@
+{
+  "name": "react-native-wooads",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/woomedya/react-native-wooads.git"
+  },
+  "author": "woomedya",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "crypto-js": "^3.1.9-1",
+    "react-native-device-info": "^5.5.3",
+    "react-native-elements": "^1.2.7",
+    "react-native-modal": "^11.5.4",
+    "react-native-vector-icons": "^6.6.0",
+    "react-native-video": "^5.0.2",
+    "woo-crypto": "^1.0.0"
+  },
+  "peerDependencies": {
+    "react": "^16.12.0",
+    "react-native": "^0.61.5"
+  }
+}
