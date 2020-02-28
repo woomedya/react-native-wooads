@@ -42,6 +42,7 @@ export default class AdvWoo extends Component {
             videoOnBuffer: false,
             videoOnLoadEnd: false,
             videoOnstop: false,
+            closePres: this.props.closePres,
         };
     }
 
@@ -51,9 +52,8 @@ export default class AdvWoo extends Component {
 
     getAdv = async () => {
         var deviceId = await DeviceInfo.getUniqueId();
-
         var advWooData = await AdvWooApiGet(deviceId);
-        if (!advWooData.ads) {
+        if (!advWooData) {
             this.setState({ isModalVisible: false });
         } else {
             this.setState({
@@ -92,9 +92,14 @@ export default class AdvWoo extends Component {
             })
     }
 
-    closeModel = () => {
+    closeModel = async () => {
         if (this.state.timer <= 0)
-            this.setState({ isModalVisible: false, videoOnstop: true });
+            this.setState({ isModalVisible: false, videoOnstop: true }, () => {
+                if (this.state.closePres)
+                    this.state.closePres(this.state.isModalVisible)
+            });
+
+
     }
 
     contentImagePres = () => {
@@ -191,6 +196,8 @@ export default class AdvWoo extends Component {
                     </SafeAreaView>
                 </Modal>
             </SafeAreaView>
+
+
         );
     }
 }
