@@ -46,6 +46,7 @@ export default class WooTransition extends Component {
         var data = await getApi(deviceId);
         if (data) {
             this.setState({
+                closeEnable: true,
                 timer: data.ads.duration || 5,
                 ads: data.ads,
                 data,
