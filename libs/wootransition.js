@@ -7,7 +7,8 @@ import { color } from "./color";
 import UrlStream from './stream';
 import DeviceInfo from 'react-native-device-info';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-
+import Geolocation from '@react-native-community/geolocation';
+import { getCoordinate, setCoordinate } from './locationrepo';
 
 export default class WooTransition extends Component {
     constructor(props) {
@@ -41,9 +42,27 @@ export default class WooTransition extends Component {
             this.props.onClose(admob);
     }
 
+    getLocation = async () => {
+        this.setLocation();
+        return await getCoordinate();
+    }
+
+    setLocation = () => {
+        Geolocation.getCurrentPosition(
+            position => {
+                locationCoordinate = { 'latitude': position.coords.latitude, 'longitude': position.coords.longitude }
+                setCoordinate(locationCoordinate);
+            },
+            error => console.log(JSON.stringify(error)),
+            { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 },
+        );
+    }
+
     refresh = async () => {
+        var locationCoordinate = await this.getLocation()
+
         var deviceId = await DeviceInfo.getUniqueId();
-        var data = await getApi(deviceId);
+        var data = await getApi(deviceId, locationCoordinate);
         if (data) {
             this.setState({
                 closeEnable: true,
@@ -128,7 +147,7 @@ export default class WooTransition extends Component {
                                 <Button
                                     buttonStyle={styles.headerButton}
                                     loadingStyle={styles.headerButton}
-                                    icon={<Icon name="close" color="white" size={20} style={styles.closeBtn} />}
+                                    icon={this.state.closeEnable ? null : <Icon name="close" color="white" size={20} style={styles.closeBtn} />}
                                     loading={this.state.closeEnable}
                                     onPress={this.closeModel}
                                 />

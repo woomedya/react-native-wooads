@@ -6,5 +6,6 @@ export default opts = {
     tokenTimeout: 20000,
     admobBannerAppID: '',
     admobInterstitialAppID: '',
-    admobNativeAppID: ''
+    admobNativeAppID: '',
+    enable: true
 };

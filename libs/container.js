@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-navigation';
 import WooTransition from './wootransition';
 import Admob, { interstitial, setInterstitialShowable, interstitialVisible } from './admob';
+import opts from '../config';
 
 export default class WooadsContainer extends Component {
     constructor(props) {
@@ -17,7 +18,7 @@ export default class WooadsContainer extends Component {
     }
 
     refresh = () => {
-        if (interstitialVisible == false) {
+        if (opts.enable && interstitialVisible == false) {
             setInterstitialShowable(false);
             this.setState({
                 admobVisible: false
@@ -41,9 +42,13 @@ export default class WooadsContainer extends Component {
 
             {this.props.children}
 
-            <WooTransition ref={ref => this.wooads = ref} onClose={this.closeWooTransition} />
+            {
+                opts.enable ? <>
+                    <WooTransition ref={ref => this.wooads = ref} onClose={this.closeWooTransition} />
 
-            {this.state.admobVisible ? <Admob type={this.props.type || "banner"}></Admob> : null}
+                    {this.state.admobVisible ? <Admob type={this.props.type || "banner"}></Admob> : null}
+                </> : null
+            }
 
         </SafeAreaView>;
     }

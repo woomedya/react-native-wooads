@@ -3,7 +3,8 @@ import container from './libs/container';
 
 export const config = ({
     serverUrl, publicKey, privateKey, applicationId, tokenTimeout,
-    admobBannerAppID, admobInterstitialAppID, admobNativeAppID
+    admobBannerAppID, admobInterstitialAppID, admobNativeAppID,
+    enable
 }) => {
     opts.serverUrl = serverUrl;
     opts.publicKey = publicKey;
@@ -16,6 +17,13 @@ export const config = ({
 
     if (tokenTimeout != null)
         opts.tokenTimeout = tokenTimeout;
+
+    if (enable != null)
+        opts.enable = enable
+}
+
+export const setEnable = value => {
+    opts.enable = value;
 }
 
 export default container;

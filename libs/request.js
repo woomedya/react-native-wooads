@@ -43,10 +43,11 @@ const baseRequest = async (url, type, obj) => {
     }
 }
 
-export const getApi = async (deviceId) => {
+export const getApi = async (deviceId, locationCoordinate) => {
     try {
         var responseJson = (await requestGetWooads({
             applicationId: opts.applicationId,
+            coordinate: locationCoordinate,
             deviceId: deviceId
         }))
         return responseJson;
