@@ -10,6 +10,10 @@ export default class WooadsContainer extends Component {
         this.props = props;
 
         this.wooads = null;
+
+        this.state = {
+            admobVisible: false
+        }
     }
 
     refresh = () => {
@@ -39,7 +43,7 @@ export default class WooadsContainer extends Component {
 
             <WooTransition ref={ref => this.wooads = ref} onClose={this.closeWooTransition} />
 
-            {admobVisible ? <Admob type={this.props.type || "banner"}></Admob> : null}
+            {this.state.admobVisible ? <Admob type={this.props.type || "banner"}></Admob> : null}
 
         </SafeAreaView>;
     }
