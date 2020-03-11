@@ -7,7 +7,7 @@ import {
 import Video from 'react-native-video';
 
 
-export default class App extends React.Component {
+export default class Stream extends React.Component {
     constructor(props) {
         super(props);
         this.onBuffer = this.onBuffer.bind(this);

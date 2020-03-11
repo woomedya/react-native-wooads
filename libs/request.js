@@ -1,25 +1,36 @@
-import Post from './post';
 import Crypto from 'woo-crypto';
 import { getUTCTime } from './date';
-import opts from './config';
+import opts from '../config';
+import Axios from "axios";
 
-export const requestAdvGet = async (obj) => {
-    var url = opts.wooServerUrl + opts.advGetUrl;
-    var type = opts.advTokenGet;
+const post = async (baseURL, url, headers, data) => {
+    var instance = Axios.create({
+        baseURL: baseURL,
+        timeout: 10000,
+        headers: { 'Content-Type': 'application/json', ...headers }
+    });
+    var responseJson = await instance.post(url, data);
+
+    return responseJson.data
+}
+
+const requestGetWooads = async (obj) => {
+    var url = opts.serverUrl + "/ads/get";
+    var type = 'ads.get';
     return (await baseRequest(url, type, obj) || {}).data;
 }
 
-export const requestAdvView = async (obj) => {
-    var url = opts.wooServerUrl + opts.advGetView;
-    var type = opts.advTokenView;
+const requestSetWooadsView = async (obj) => {
+    var url = opts.serverUrl + "/ads/view";
+    var type = 'ads.view';
     return (await baseRequest(url, type, obj) || {}).data;
 }
 
-export const baseRequest = async (url, type, obj) => {
+const baseRequest = async (url, type, obj) => {
     try {
         var type = type;
-        var token = (Crypto.encrypt(JSON.stringify({ expire: getUTCTime(opts.timeout).toString(), type }), opts.publicKey, opts.privateKey));
-        var result = await Post.post(url, "", {
+        var token = (Crypto.encrypt(JSON.stringify({ expire: getUTCTime(opts.tokenTimeout).toString(), type }), opts.publicKey, opts.privateKey));
+        var result = await post(url, "", {
             public: opts.publicKey,
             token
         }, {
@@ -32,47 +43,27 @@ export const baseRequest = async (url, type, obj) => {
     }
 }
 
-
-
-/**
- * Reklam  çekilir.
- */
-export const AdvWooApiGet = async (deviceId) => {
+export const getApi = async (deviceId) => {
     try {
-        var responseJson = (await requestAdvGet({
-            categories: [],
-            tags: [],
-            content: {},
+        var responseJson = (await requestGetWooads({
             applicationId: opts.applicationId,
             deviceId: deviceId
-
         }))
         return responseJson;
     } catch (error) {
         var eror = {}
         return eror;
-
     }
-
 }
 
-/**
- * izlendi bilgisi gönderilir.
- */
-export const AdvWooApiViews = async (sessionKey) => {
+export const setViewApi = async (sessionKey) => {
     try {
-        var responseJson = (await requestAdvView({
-            categories: [],
-            tags: [],
-            content: {},
+        var responseJson = (await requestSetWooadsView({
             sessionKey: sessionKey,
             applicationId: opts.applicationId
         }))
         return responseJson;
     } catch (error) {
-
         return {};
-
     }
-
 }
