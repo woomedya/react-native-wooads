@@ -1,5 +1,6 @@
 import opts from './config';
 import container from './libs/container';
+import * as premiumStore from './libs/premiumstore';
 
 export const config = ({
     serverUrl, publicKey, privateKey, applicationId, tokenTimeout,
@@ -18,12 +19,15 @@ export const config = ({
     if (tokenTimeout != null)
         opts.tokenTimeout = tokenTimeout;
 
-    if (enable != null)
+    if (enable != null) {
         opts.enable = enable
+        premiumStore.setPremium(enable);
+    }
 }
 
 export const setEnable = value => {
     opts.enable = value;
+    premiumStore.setPremium(value);
 }
 
 export default container;
