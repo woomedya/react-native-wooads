@@ -2,11 +2,11 @@ import * as storeUtil from 'jutore';
 import opts from '../config';
 
 var store = storeUtil.setScope('nodemodules_wooads', {
-    value: true
+    value: false
 });
 
 export const setAdsEnable = (value) => {
-    store.set('value', value == null ? true : value);
+    store.set('value', value == null ? false : value);
 }
 
 export const getAdsEnable = () => {
