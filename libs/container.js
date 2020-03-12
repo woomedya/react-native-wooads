@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-navigation';
 import WooTransition from './wootransition';
 import Admob, { interstitial, setInterstitialShowable, interstitialVisible } from './admob';
-import premiumStore, { getPremium } from './premiumstore';
+import enablestore, { getAdsEnable } from './enablestore';
 
 export default class WooadsContainer extends Component {
     constructor(props) {
@@ -14,14 +14,14 @@ export default class WooadsContainer extends Component {
 
         this.state = {
             admobVisible: false,
-            enable: getPremium()
+            enable: getAdsEnable()
         }
     }
 
     componentDidMount() {
-        premiumStore.addListener('premium', () => {
+        enablestore.addListener('value', () => {
             this.setState({
-                enable: getPremium()
+                enable: getAdsEnable()
             }, this.refresh);
         });
     }
