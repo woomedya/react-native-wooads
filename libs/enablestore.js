@@ -6,7 +6,8 @@ var store = storeUtil.setScope('nodemodules_wooads', {
 });
 
 export const setAdsEnable = (value) => {
-    store.set('value', value == null ? false : value);
+    if (value != null && value != getAdsEnable())
+        store.set('value', value);
 }
 
 export const getAdsEnable = () => {
