@@ -19,14 +19,10 @@ export const config = ({
     if (tokenTimeout != null)
         opts.tokenTimeout = tokenTimeout;
 
-    if (enable != null)
-        opts.enable = enable;
-
-    enableStore.getAdsEnable(opts.enable);
+    enableStore.setAdsEnable(enable);
 }
 
 export const setEnable = value => {
-    opts.enable = value;
     enableStore.setAdsEnable(value);
 }
 

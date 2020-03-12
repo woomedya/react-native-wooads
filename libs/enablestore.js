@@ -2,15 +2,15 @@ import * as storeUtil from 'jutore';
 import opts from '../config';
 
 var store = storeUtil.setScope('nodemodules_wooads', {
-    value: opts.enable
+    value: true
 });
 
 export const setAdsEnable = (value) => {
-    store.set('value', value);
+    store.set('value', value == null ? true : value);
 }
 
 export const getAdsEnable = () => {
-    return store.get('value') || opts.enable;
+    return store.get('value');
 }
 
 export default store;
