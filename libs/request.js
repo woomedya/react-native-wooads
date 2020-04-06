@@ -28,7 +28,6 @@ const requestSetWooadsView = async (obj) => {
 
 const baseRequest = async (url, type, obj) => {
     try {
-        var type = type;
         var token = (Crypto.encrypt(JSON.stringify({ expire: getUTCTime(opts.tokenTimeout).toString(), type }), opts.publicKey, opts.privateKey));
         var result = await post(url, "", {
             public: opts.publicKey,
