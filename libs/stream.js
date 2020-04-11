@@ -27,8 +27,11 @@ export default class Stream extends React.Component {
 
     onLoad = async (data) => {
         this.setState({ duration: data.duration });
+        this.props.onLoad();
     }
-
+    onError = async () => {
+        this.props.onError();
+    }
     onLoadStart = async () => {
         this.props.onLoadStart();
     }
@@ -67,7 +70,7 @@ export default class Stream extends React.Component {
                         this.player = ref
                     }}                                      // Store reference
                     onBuffer={this.onBuffer}                // Callback when remote video is buffering
-                    onError={this.videoError}
+                    onError={this.onError}
                     onLoad={this.onLoad}
                     onLoadStart={this.onLoadStart}
                     paused={this.state.paused}

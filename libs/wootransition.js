@@ -116,6 +116,12 @@ export default class WooTransition extends Component {
         });
     }
 
+    onError = () => {
+        this.setState({ videoOnLoadStart: true }, () => {
+            this.onLoadEndWebView();
+        });
+    }
+
     onLoadEnd = () => {
         this.setState({ videoOnLoadEnd: true });
     }
@@ -165,6 +171,7 @@ export default class WooTransition extends Component {
                                         onBuffer={this.onBuffer}
                                         onLoadStart={this.onLoadStart}
                                         onLoadEnd={this.onLoadEnd}
+                                        onError={this.onError}
                                     /> : null
                             }
                             {
