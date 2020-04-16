@@ -48,9 +48,9 @@ export default class Stream extends React.Component {
             this.props.onBuffer(isBuffering);
     }
 
-    onLoadEnd = syntheticEvent => {
+    onLoadEnd = () => {
         if (this.props.onLoadEnd)
-            this.props.onLoadEnd(syntheticEvent);
+            this.props.onLoadEnd();
     }
 
     getCurrentTimePercentage = () => {
