@@ -27,13 +27,16 @@ export default class Stream extends React.Component {
 
     onLoad = async (data) => {
         this.setState({ duration: data.duration });
-        this.props.onLoad();
+        if (this.props.onLoad)
+            this.props.onLoad();
     }
     onError = async () => {
-        this.props.onError();
+        if (this.props.onError)
+            this.props.onError();
     }
     onLoadStart = async () => {
-        this.props.onLoadStart();
+        if (this.props.onLoadStart)
+            this.props.onLoadStart();
     }
     onProgress = (data) => {
         this.setState({ currentTime: data.currentTime });
@@ -41,7 +44,13 @@ export default class Stream extends React.Component {
 
     onBuffer = ({ isBuffering }) => {
         this.setState({ isBuffering: isBuffering, paused: this.state.paused });
-        this.props.onBuffer(isBuffering);
+        if (this.props.onBuffer)
+            this.props.onBuffer(isBuffering);
+    }
+
+    onLoadEnd = syntheticEvent => {
+        if (this.props.onLoadEnd)
+            this.props.onLoadEnd(syntheticEvent);
     }
 
     getCurrentTimePercentage = () => {
@@ -76,7 +85,7 @@ export default class Stream extends React.Component {
                     paused={this.state.paused}
                     resizeMode="stretch"
                     onProgress={this.onProgress}
-                    onEnd={this.props.onLoadEnd}
+                    onEnd={this.onLoadEnd}
                     audioOnly={true}
                     allowsExternalPlayback={true}
                     controls={false}
