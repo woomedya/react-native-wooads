@@ -66,10 +66,11 @@ export default class WooTransition extends Component {
         if (data) {
             this.setState({
                 closeEnable: true,
-                timer: data.ads.duration || 5,
+                timer: data.ads.duration == null ? 5 : data.ads.duration || 0,
                 ads: data.ads,
                 data,
-                isModalVisible: true
+                isModalVisible: true,
+                videoOnLoadEnd: false
             });
         } else {
             this.setState({ isModalVisible: false }, () => {
@@ -111,13 +112,13 @@ export default class WooTransition extends Component {
     }
 
     onLoadStart = () => {
-        this.setState({ videoOnLoadStart: true }, () => {
+        this.setState({ videoOnLoadStart: true, videoOnLoadEnd: false }, () => {
             this.onLoadEndWebView();
         });
     }
 
     onError = () => {
-        this.setState({ videoOnLoadStart: true }, () => {
+        this.setState({ videoOnLoadStart: true, videoOnLoadEnd: false }, () => {
             this.onLoadEndWebView();
         });
     }
@@ -139,13 +140,14 @@ export default class WooTransition extends Component {
             <SafeAreaView style={styles.view}>
                 <Modal isVisible={this.state.isModalVisible}>
                     <SafeAreaView style={styles.modal}>
-                        {this.state.ads.mediaType == "Video" && !this.state.videoOnLoadEnd ?
-                            <TouchableOpacity style={styles.muteTouch}
-                                onPress={this.onMute}>
-                                <Icon name="volume-up" color="white" size={20}
-                                    style={styles.muteIcon} />
-                            </TouchableOpacity>
-                            : null
+                        {
+                            this.state.ads.mediaType == "Video" && !this.state.videoOnLoadEnd ?
+                                <TouchableOpacity style={styles.muteTouch}
+                                    onPress={this.onMute}>
+                                    <Icon name="volume-up" color="white" size={20}
+                                        style={styles.muteIcon} />
+                                </TouchableOpacity>
+                                : null
                         }
                         <View style={styles.headerView} >
                             <View style={[styles.HeaderRightView]}>
