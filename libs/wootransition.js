@@ -1,5 +1,5 @@
 import React, { Component, } from "react";
-import { View, SafeAreaView, StyleSheet, ActivityIndicator, Text, TouchableOpacity, Linking } from "react-native";
+import { View, SafeAreaView, StyleSheet, ActivityIndicator, Text, Dimensions, TouchableOpacity, Linking, Platform, StatusBar } from "react-native";
 import { getApi, setViewApi } from "./request";
 import Modal from "react-native-modal";
 import { Button, Image } from "react-native-elements";
@@ -9,6 +9,34 @@ import DeviceInfo from 'react-native-device-info';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Geolocation from '@react-native-community/geolocation';
 import { getCoordinate, setCoordinate } from './locationrepo';
+
+const { width, height } = Dimensions.get('window');
+
+function stretchByDimension(cw, ch, tw, th) {
+    var width = 0, height = 0;
+
+    var wr = tw / cw;
+    var hr = th / ch;
+    var deger = 35 + (Platform.OS === 'android' ? StatusBar.currentHeight : 0)
+    if (wr < hr) {
+        width = cw * wr - deger;
+        height = ch * wr - deger;
+    } else {
+        width = cw * hr - deger;
+        height = ch * hr - deger;
+    }
+
+    return { width, height };
+}
+
+const reklam_wd = () => {
+    var wd = stretchByDimension(1080, 1920, width, height).width
+    return wd;
+}
+const reklam_ht = () => {
+    ht = stretchByDimension(1080, 1920, width, height).height
+    return ht;
+}
 
 export default class WooTransition extends Component {
     constructor(props) {
@@ -220,7 +248,9 @@ const styles = StyleSheet.create({
         backgroundColor: "#fff",
     },
     modal: {
-        flex: 1,
+        alignSelf: "center",
+        width: reklam_wd(),
+        height: reklam_ht(),
         backgroundColor: color.TRANSPARENT,
     },
     contentView: {
@@ -271,13 +301,13 @@ const styles = StyleSheet.create({
     bottomView: {
         backgroundColor: color.WHITE,
         justifyContent: "center",
-        width: "auto",
-        height: 70,
+        width: reklam_wd(),
+        height: reklam_ht() / 6,
         zIndex: 1,
     },
     bottomImage: {
-        width: "auto",
-        height: 70,
+        width: reklam_wd(),
+        height: reklam_ht() / 6,
         backgroundColor: color.WHITE
     },
     muteTouch: {
