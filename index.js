@@ -5,7 +5,7 @@ import * as enableStore from './libs/enablestore';
 export const config = ({
     serverUrl, publicKey, privateKey, applicationId, tokenTimeout,
     admobBannerAppID, admobInterstitialAppID, admobNativeAppID,
-    enable
+    enable, pages
 }) => {
     opts.serverUrl = serverUrl;
     opts.publicKey = publicKey;
@@ -19,11 +19,16 @@ export const config = ({
     if (tokenTimeout != null)
         opts.tokenTimeout = tokenTimeout;
 
+    enableStore.setPageAdsEnable(pages);
     enableStore.setAdsEnable(enable);
 }
 
 export const setEnable = value => {
     enableStore.setAdsEnable(value);
+}
+
+export const setPageEnable = pages => {
+    enableStore.setPageAdsEnable(pages);
 }
 
 export default container;
