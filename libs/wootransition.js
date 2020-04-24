@@ -53,12 +53,13 @@ export default class WooTransition extends Component {
             videoOnLoadStart: false,
             videoOnBuffer: false,
             videoOnLoadEnd: false,
-            videoOnstop: false,
+            videoOnstop: false
         };
     }
 
     componentDidMount = () => {
-        this.refresh();
+        if (this.props.initial)
+            this.refresh();
     }
 
     componentWillUnmount() {

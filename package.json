@@ -1,6 +1,6 @@
 {
   "name": "react-native-wooads",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -15,7 +15,7 @@
   "dependencies": {
     "axios": "^0.19.2",
     "crypto-js": "^3.1.9-1",
-    "judel": "^1.0.2",
+    "judel": "^1.0.3",
     "jutore": "^1.0.0",
     "react-native-modal": "^11.5.4",
     "woo-crypto": "^1.0.0"

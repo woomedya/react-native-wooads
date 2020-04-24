@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-navigation';
 import WooTransition from './wootransition';
 import Admob, { interstitial, setInterstitialShowable, interstitialVisible } from './admob';
 import enablestore, { getAdsEnable } from './enablestore';
+import * as settingsRepo from './settings';
 
 export default class WooadsContainer extends Component {
     constructor(props) {
@@ -11,10 +12,12 @@ export default class WooadsContainer extends Component {
         this.props = props;
 
         this.wooads = null;
+        this.banner = props.banner == null ? true : props.banner;
 
         this.state = {
             admobVisible: false,
-            enable: getAdsEnable()
+            enable: getAdsEnable(),
+            initial: settingsRepo.getInitialSync()
         }
     }
 
@@ -26,13 +29,15 @@ export default class WooadsContainer extends Component {
         });
     }
 
-    refresh = () => {
+    refresh = async () => {
         if (this.state.enable && interstitialVisible == false) {
             setInterstitialShowable(false);
             this.setState({
-                admobVisible: false
+                admobVisible: false,
+                initial: await settingsRepo.getInitial()
             }, () => {
-                if (this.wooads && this.wooads.refresh) this.wooads.refresh();
+                if (this.state.initial && this.wooads && this.wooads.refresh)
+                    this.wooads.refresh();
             });
         }
     }
@@ -53,9 +58,9 @@ export default class WooadsContainer extends Component {
 
             {
                 this.state.enable ? <>
-                    <WooTransition ref={ref => this.wooads = ref} onClose={this.closeWooTransition} />
+                    <WooTransition ref={ref => this.wooads = ref} onClose={this.closeWooTransition} initial={this.state.initial} />
 
-                    {this.state.admobVisible ? <Admob type={this.props.type || "banner"}></Admob> : null}
+                    {this.banner && this.state.admobVisible ? <Admob type={this.props.type || "banner"}></Admob> : null}
                 </> : null
             }
 
