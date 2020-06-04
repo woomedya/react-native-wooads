@@ -45,8 +45,15 @@ export default class WooadsContainer extends Component {
 
     refresh = async () => {
         if (this.state.enable && interstitialVisible == false) {
-            setInterstitialShowable(false);
-
+            setInterstitialShowable(this.state.pageEnable.transition || this.state.enable);
+            this.setState({
+                admobVisible: this.state.pageEnable.banner || this.state.enable
+            }, () => {
+                if (this.state.initial && this.wooads && this.wooads.refresh)
+                    this.wooads.refresh();
+            });
+        }
+        if (this.state.enable && interstitialVisible == true) {
             this.setState({
                 admobVisible: false
             }, () => {
@@ -54,6 +61,7 @@ export default class WooadsContainer extends Component {
                     this.wooads.refresh();
             });
         }
+
     }
 
     closeWooTransition = (admobInterstitial) => {

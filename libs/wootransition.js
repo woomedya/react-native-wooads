@@ -223,7 +223,7 @@ export default class WooTransition extends Component {
                                     </TouchableOpacity> : null
                             }
                         </View>
-                        <View style={styles.bottomView}>
+                        {this.state.ads.goToBackgroundUrl ? <View style={styles.bottomView}>
                             <TouchableOpacity onPress={this.contentImagePres}>
                                 <Image
                                     key={this.state.ads.goToBackgroundUrl}
@@ -234,7 +234,7 @@ export default class WooTransition extends Component {
                                     PlaceholderContent={<ActivityIndicator />}
                                 />
                             </TouchableOpacity>
-                        </View>
+                        </View> : null}
                     </SafeAreaView>
                 </Modal>
             </SafeAreaView>
