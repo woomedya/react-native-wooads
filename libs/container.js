@@ -40,14 +40,16 @@ export default class WooadsContainer extends Component {
             }, () => {
                 if (initial) this.refresh();
             });
+        } else {
+            this.refresh();
         }
     }
 
     refresh = async () => {
         if (this.state.enable && interstitialVisible == false) {
-            setInterstitialShowable(this.state.pageEnable.transition || this.state.enable);
+            setInterstitialShowable(this.getTransitionEnable());
             this.setState({
-                admobVisible: this.state.pageEnable.banner || this.state.enable
+                admobVisible: this.getBannerEnable()
             }, () => {
                 if (this.state.initial && this.wooads && this.wooads.refresh)
                     this.wooads.refresh();
