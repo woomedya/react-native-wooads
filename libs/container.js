@@ -5,6 +5,7 @@ import WooTransition from './wootransition';
 import Admob, { interstitial, setInterstitialShowable, interstitialVisible } from './admob';
 import enablestore, { getAdsEnable, getPageAdsEnable } from './enablestore';
 import * as settingsRepo from './settings';
+import WooBanner from './woobanner';
 
 export default class WooadsContainer extends Component {
     constructor(props) {
@@ -15,6 +16,7 @@ export default class WooadsContainer extends Component {
 
         this.state = {
             admobVisible: false,
+            transitionShowed: false,
             enable: getAdsEnable(),
             pageEnable: getPageAdsEnable(this.props.page),
             initial: settingsRepo.getInitialSync()
@@ -85,6 +87,12 @@ export default class WooadsContainer extends Component {
         return pageEnable.transition == null ? this.state.enable : pageEnable.transition;
     }
 
+    getInfoVisibleTransition = (visible) => {
+        this.setState({
+            transitionShowed: visible
+        });
+    }
+
     render() {
         return <SafeAreaView style={styles.container} forceInset={{ top: 'never' }}>
 
@@ -92,9 +100,18 @@ export default class WooadsContainer extends Component {
 
             {
                 this.state.enable ? <>
-                    {this.getTransitionEnable() ? <WooTransition ref={ref => this.wooads = ref} onClose={this.closeWooTransition} initial={this.state.initial} /> : null}
+                    {
+                        this.getTransitionEnable() ? <WooTransition
+                            ref={ref => this.wooads = ref}
+                            onClose={this.closeWooTransition}
+                            getInfoVisible={this.getInfoVisibleTransition}
+                            initial={this.state.initial}
+                        /> : null
+                    }
 
-                    {this.getBannerEnable() && this.state.admobVisible ? <Admob type={this.props.type || "banner"}></Admob> : null}
+                    {
+                        this.getBannerEnable() && this.state.admobVisible && !this.state.transitionShowed ? <WooBanner /> : null
+                    }
                 </> : null
             }
 

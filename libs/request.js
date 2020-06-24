@@ -2,6 +2,10 @@ import Crypto from 'woo-crypto';
 import { getUTCTime } from './date';
 import opts from '../config';
 import Axios from "axios";
+import { Dimensions } from "react-native";
+import { version } from '../package.json';
+
+const { width, height } = Dimensions.get('window');
 
 const post = async (baseURL, url, headers, data) => {
     var instance = Axios.create({
@@ -26,6 +30,12 @@ const requestSetWooadsView = async (obj) => {
     return (await baseRequest(url, type, obj) || {}).data;
 }
 
+const requestSetWooadsClick = async (obj) => {
+    var url = opts.serverUrl + "/ads/click";
+    var type = 'ads.click';
+    return (await baseRequest(url, type, obj) || {}).data;
+}
+
 const baseRequest = async (url, type, obj) => {
     try {
         var token = (Crypto.encrypt(JSON.stringify({ expire: getUTCTime(opts.tokenTimeout).toString(), type }), opts.publicKey, opts.privateKey));
@@ -35,7 +45,6 @@ const baseRequest = async (url, type, obj) => {
         }, {
             ...obj
         });
-
         return result;
     } catch (error) {
         return null;
@@ -47,18 +56,47 @@ export const getApi = async (deviceId, locationCoordinate) => {
         var responseJson = (await requestGetWooads({
             applicationId: opts.applicationId,
             coordinate: locationCoordinate,
-            deviceId: deviceId
+            deviceId: deviceId,
+            screen: { width, height },
+            version
+        }));
+        return responseJson;
+    } catch (error) {
+        return {};
+    }
+}
+
+export const getApiBanner = async (deviceId, locationCoordinate) => {
+    try {
+        var responseJson = (await requestGetWooads({
+            applicationId: opts.applicationId,
+            coordinate: locationCoordinate,
+            deviceId: deviceId,
+            screen: { width, height },
+            version,
+            type: 'Banner'
         }))
         return responseJson;
     } catch (error) {
-        var eror = {}
-        return eror;
+        return {};
     }
 }
 
 export const setViewApi = async (sessionKey) => {
     try {
         var responseJson = (await requestSetWooadsView({
+            sessionKey: sessionKey,
+            applicationId: opts.applicationId
+        }))
+        return responseJson;
+    } catch (error) {
+        return {};
+    }
+}
+
+export const setClickCountApi = async (sessionKey) => {
+    try {
+        var responseJson = (await requestSetWooadsClick({
             sessionKey: sessionKey,
             applicationId: opts.applicationId
         }))

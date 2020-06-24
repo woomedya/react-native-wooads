@@ -1,14 +1,14 @@
 import React, { Component, } from "react";
-import { View, SafeAreaView, StyleSheet, ActivityIndicator, Text, Dimensions, TouchableOpacity, Linking, Platform, StatusBar } from "react-native";
-import { getApi, setViewApi } from "./request";
+import { View, SafeAreaView, StyleSheet, Text, Dimensions, Linking, Platform, StatusBar } from "react-native";
+import { getApi, setViewApi, setClickCountApi } from "./request";
 import Modal from "react-native-modal";
-import { Button, Image } from "react-native-elements";
+import { Button } from "react-native-elements";
 import { color } from "./color";
-import UrlStream from './stream';
 import DeviceInfo from 'react-native-device-info';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Geolocation from '@react-native-community/geolocation';
 import { getCoordinate, setCoordinate } from './locationrepo';
+import WebView from 'react-native-webview';
 
 const { width, height } = Dimensions.get('window');
 
@@ -26,15 +26,20 @@ function stretchByDimension(cw, ch, tw, th) {
         height = ch * hr - deger;
     }
 
-    return { width, height };
+    return { width: cw < width ? cw : width, height: ch < height ? ch : height };
 }
 
-const reklam_wd = () => {
-    var wd = stretchByDimension(1080, 1920, width, height).width
+const reklam_wd = (aw, ah) => {
+    aw = Number(aw);
+    ah = Number(ah);
+    var wd = stretchByDimension(aw, ah, width, height).width
     return wd;
 }
-const reklam_ht = () => {
-    ht = stretchByDimension(1080, 1920, width, height).height
+
+const reklam_ht = (aw, ah) => {
+    aw = Number(aw);
+    ah = Number(ah);
+    ht = stretchByDimension(aw, ah, width, height).height
     return ht;
 }
 
@@ -43,23 +48,22 @@ export default class WooTransition extends Component {
         super(props)
         this.props = props;
 
+        this.webview = null;
+
         this.state = {
             isModalVisible: false,
             data: {},
             ads: {},
-            timer: 5,
-            closeEnable: true,
-            videoMuted: false,
-            videoOnLoadStart: false,
-            videoOnBuffer: false,
-            videoOnLoadEnd: false,
-            videoOnstop: false
+            timer: 0,
+            closeEnable: true
         };
     }
 
     componentDidMount = () => {
         if (this.props.initial)
             this.refresh();
+
+        this.setInfoVisible(false);
     }
 
     componentWillUnmount() {
@@ -69,6 +73,11 @@ export default class WooTransition extends Component {
     onClose = (admob) => {
         if (this.props.onClose)
             this.props.onClose(admob);
+    }
+
+    setInfoVisible = (visible) => {
+        if (this.props.getInfoVisible)
+            this.props.getInfoVisible(visible);
     }
 
     getLocation = async () => {
@@ -95,150 +104,163 @@ export default class WooTransition extends Component {
         if (data) {
             this.setState({
                 closeEnable: true,
-                timer: data.ads.duration == null ? 5 : data.ads.duration || 0,
+                timer: data.ads.duration == null ? 0 : data.ads.duration || 0,
                 ads: data.ads,
                 data,
                 isModalVisible: true,
-                videoOnLoadEnd: false
+            }, () => {
+                this.setInfoVisible(true);
             });
         } else {
             this.setState({ isModalVisible: false }, () => {
+                this.setInfoVisible(false);
                 this.onClose(true);
             });
         }
+    }
+
+    setNavigate = (event) => {
+        if (event.url !== "" && event.url.indexOf('http') > -1 && this.webview) {
+            this.webview.stopLoading();
+            Linking.openURL(event.url);
+        }
+    }
+
+    setClick = () => {
+        setClickCountApi(this.state.data.sessionKey);
     }
 
     setView = async () => {
         await setViewApi(this.state.data.sessionKey);
     }
 
-    onLoadEndWebView = async () => {
-        await this.setView();
+    onLoadEndWebView = () => {
+        this.setView();
         this.clockCall = setInterval(() => {
             this.decrementClock();
         }, 1000);
     }
 
     decrementClock = () => {
-        if (!this.state.timer <= 0)
+        if (this.state.timer <= 0) {
+            clearInterval(this.clockCall);
+            this.setState({ closeEnable: false })
+        } else {
             this.setState(() => ({
                 timer: this.state.timer - 1
             }), () => {
                 if (this.state.timer === 0) {
-                    clearInterval(this.clockCall)
+                    clearInterval(this.clockCall);
                     this.setState({ closeEnable: false })
                 }
             })
+        }
     }
 
     closeModel = async () => {
         if (this.state.timer <= 0)
-            this.setState({ isModalVisible: false, videoOnstop: true }, this.onClose);
+            this.setState({ isModalVisible: false }, () => {
+                this.setInfoVisible(false);
+                this.onClose();
+            });
     }
 
-    contentImagePres = () => {
-        Linking.openURL(this.state.ads.goToUrl);
+    onError = (err) => {
+        clearInterval(this.clockCall);
+        this.setState({ closeEnable: false })
     }
 
-    onLoadStart = () => {
-        this.setState({ videoOnLoadStart: true, videoOnLoadEnd: false }, () => {
-            this.onLoadEndWebView();
-        });
+    onMessage = (e) => {
+        this.setClick();
     }
 
-    onError = () => {
-        this.setState({ videoOnLoadStart: true, videoOnLoadEnd: false }, () => {
-            this.onLoadEndWebView();
-        });
-    }
+    getHTML = (html, width, height) => {
+        width = reklam_wd(width, height);
+        height = reklam_ht(width, height);
 
-    onLoadEnd = () => {
-        this.setState({ videoOnLoadEnd: true });
-    }
+        return `<!DOCTYPE html>
+        <html>
 
-    onBuffer = (isBuffering) => {
-        this.setState({ videoOnBuffer: isBuffering });
-    }
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    onMute = () => {
-        this.setState({ videoMuted: !this.state.videoMuted });
+            <style>
+                body {
+                    padding: 0;
+                    margin: 0;
+                    width: ${width}'px';
+                    height: ${height}'px';
+                }
+            </style>
+        </head>
+        <body id="html">${html}</body>
+        <script>
+            document.addEventListener('click', function (event) {
+                window.ReactNativeWebView.postMessage("clicked");
+            }, false);
+        </script>
+        </html>`;
     }
 
     render() {
-        return (
-            <SafeAreaView style={styles.view}>
-                <Modal isVisible={this.state.isModalVisible}>
-                    <SafeAreaView style={styles.modal}>
-                        {
-                            this.state.ads.mediaType == "Video" && !this.state.videoOnLoadEnd ?
-                                <TouchableOpacity style={styles.muteTouch}
-                                    onPress={this.onMute}>
-                                    <Icon name="volume-up" color="white" size={20}
-                                        style={styles.muteIcon} />
-                                </TouchableOpacity>
-                                : null
-                        }
-                        <View style={styles.headerView} >
-                            <View style={[styles.HeaderRightView]}>
-                                <Text style={styles.headerText}> {this.state.timer > 0 ? this.state.timer : ""}</Text>
-                                <Button
-                                    buttonStyle={styles.headerButton}
-                                    loadingStyle={styles.headerButton}
-                                    icon={this.state.closeEnable ? null : <Icon name="close" color="white" size={20} style={styles.closeBtn} />}
-                                    loading={this.state.closeEnable}
-                                    onPress={this.closeModel}
-                                />
-                            </View>
+        return this.state.ads.id ? <SafeAreaView style={styles.view}>
+            <Modal isVisible={this.state.isModalVisible}>
+                <SafeAreaView style={[styles.modal, {
+                    width: reklam_wd(this.state.ads.width, this.state.ads.height),
+                    height: reklam_ht(this.state.ads.width, this.state.ads.height),
+                }]}>
+                    <View style={styles.headerView} >
+                        <View style={[styles.HeaderRightView]}>
+                            <Text style={styles.headerText}> {this.state.timer > 0 ? this.state.timer : ""}</Text>
+                            <Button
+                                buttonStyle={styles.headerButton}
+                                loadingStyle={styles.headerButton}
+                                icon={
+                                    this.state.closeEnable ? null :
+                                        <Icon name="close" color="white" size={20} style={styles.closeBtn} />
+                                }
+                                loading={this.state.closeEnable}
+                                onPress={this.closeModel}
+                            />
                         </View>
-                        <View style={styles.contentView}>
-                            {
-                                this.state.ads.mediaType == "Video" && !this.state.videoOnLoadEnd ?
-                                    <UrlStream
-                                        link={this.state.ads.videoUrl}
-                                        title={this.state.ads.title}
-                                        video={true}
-                                        paused={this.state.videoOnstop}
-                                        muted={this.state.videoMuted}
-                                        onBuffer={this.onBuffer}
-                                        onLoadStart={this.onLoadStart}
-                                        onLoadEnd={this.onLoadEnd}
-                                        onError={this.onError}
-                                    /> : null
-                            }
-                            {
-                                this.state.ads.contentUrl ?
-                                    <TouchableOpacity
-                                        style={
-                                            !this.state.ads.mediaType == "Image" && this.state.ads.contentUrl ? {} :
-                                                (!this.state.ads.contentUrl || (this.state.ads.mediaType == "Video" && !this.state.videoOnLoadEnd)
-                                                    ? { display: "none" } : {})}
-                                        onPress={this.contentImagePres}>
-                                        <Image
-                                            resizeMode="stretch"
-                                            source={{ uri: this.state.ads.contentUrl }}
-                                            containerStyle={styles.image}
-                                            placeholderStyle={styles.image}
-                                            onLoadEnd={e => this.onLoadEndWebView()}
-                                        />
-                                    </TouchableOpacity> : null
-                            }
-                        </View>
-                        {this.state.ads.goToBackgroundUrl ? <View style={styles.bottomView}>
-                            <TouchableOpacity onPress={this.contentImagePres}>
-                                <Image
-                                    key={this.state.ads.goToBackgroundUrl}
-                                    resizeMode="stretch"
-                                    source={{ uri: this.state.ads.goToBackgroundUrl }}
-                                    containerStyle={styles.bottomImage}
-                                    placeholderStyle={styles.bottomImage}
-                                    PlaceholderContent={<ActivityIndicator />}
-                                />
-                            </TouchableOpacity>
-                        </View> : null}
-                    </SafeAreaView>
-                </Modal>
-            </SafeAreaView>
-        );
+                    </View>
+                    <View style={styles.contentView}>
+                        <WebView
+                            key={this.state.ads.id}
+                            originWhitelist={['*']}
+                            style={styles.webViewStyle}
+                            ref={r => this.webview = r}
+                            source={{
+                                html: this.getHTML(this.state.ads.code, this.state.ads.width, this.state.ads.height)
+                            }}
+                            useWebKit
+                            allowFileAccess={true}
+                            javaScriptEnabled={true}
+                            javaScriptEnabledAndroid={true}
+                            scalesPageToFit={true}
+                            thirdPartyCookiesEnabled={true}
+                            domStorageEnabled={true}
+                            startInLoadingState={false}
+                            bounces={true}
+                            allowUniversalAccessFromFileURLs={true}
+                            mixedContentMode="always"
+                            sharedCookiesEnabled={true}
+                            allowFileAccessFromFileURLs={true}
+                            cacheEnabled={true}
+                            allowsLinkPreview={true}
+                            mediaPlaybackRequiresUserAction={false}
+                            allowsFullscreenVideo={false}
+                            allowsInlineMediaPlayback={true}
+                            onLoadEnd={this.onLoadEndWebView}
+                            onError={this.onError}
+                            onNavigationStateChange={this.setNavigate}
+                            onMessage={this.onMessage}
+                        />
+                    </View>
+                </SafeAreaView>
+            </Modal>
+        </SafeAreaView> : null
     }
 }
 
@@ -250,8 +272,6 @@ const styles = StyleSheet.create({
     },
     modal: {
         alignSelf: "center",
-        width: reklam_wd(),
-        height: reklam_ht(),
         backgroundColor: color.TRANSPARENT,
     },
     contentView: {
@@ -261,12 +281,6 @@ const styles = StyleSheet.create({
         zIndex: -1,
         backgroundColor: color.BLACK,
     },
-    image: {
-        width: "auto",
-        height: "100%",
-        backgroundColor: color.WHITE
-
-    },
     headerView: {
         position: 'absolute',
         right: 0,
@@ -275,8 +289,8 @@ const styles = StyleSheet.create({
         backgroundColor: color.TRANSPARENT,
         justifyContent: "space-between",
         width: "auto",
-        paddingRight: 10,
-        paddingTop: 20,
+        paddingRight: 1,
+        paddingTop: 8,
         zIndex: 1,
     },
     headerText: {
@@ -299,32 +313,10 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: 'white',
     },
-    bottomView: {
-        backgroundColor: color.WHITE,
-        justifyContent: "center",
-        width: reklam_wd(),
-        height: reklam_ht() / 6,
-        zIndex: 1,
-    },
-    bottomImage: {
-        width: reklam_wd(),
-        height: reklam_ht() / 6,
-        backgroundColor: color.WHITE
-    },
-    muteTouch: {
-        width: 20,
-        height: 20,
-        position: "absolute",
-        top: 0,
-        padding: 15,
-    },
-    muteIcon: {
-        width: 20,
-        height: 20
-    },
     closeBtn: {
         position: "absolute",
         left: 1.5, top: 1.5,
         alignSelf: "center"
-    }
+    },
+    webViewStyle: { backgroundColor: color.TRANSPARENT }
 });
