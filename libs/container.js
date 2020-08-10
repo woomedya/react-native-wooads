@@ -94,7 +94,7 @@ export default class WooadsContainer extends Component {
     }
 
     render() {
-        return <SafeAreaView style={styles.container} forceInset={{ top: 'never' }}>
+        return <SafeAreaView style={[styles.container, this.props.style]} forceInset={{ top: 'never' }}>
 
             {this.props.children}
 
