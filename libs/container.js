@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-navigation';
 import WooTransition from './wootransition';
 import Admob, { interstitial, setInterstitialShowable, interstitialVisible } from './admob';
@@ -94,7 +94,7 @@ export default class WooadsContainer extends Component {
     }
 
     render() {
-        return <SafeAreaView style={[styles.container, this.props.style]} forceInset={{ top: 'never' }}>
+        return this.props.views == "safe" ? <View style={[styles.container, this.props.style]} forceInset={{ top: 'never' }}>
 
             {this.props.children}
 
@@ -115,7 +115,28 @@ export default class WooadsContainer extends Component {
                 </> : null
             }
 
-        </SafeAreaView>;
+        </View> : <SafeAreaView style={[styles.container, this.props.style]} forceInset={{ top: 'never' }}>
+
+                {this.props.children}
+
+                {
+                    this.state.enable ? <>
+                        {
+                            this.getTransitionEnable() ? <WooTransition
+                                ref={ref => this.wooads = ref}
+                                onClose={this.closeWooTransition}
+                                getInfoVisible={this.getInfoVisibleTransition}
+                                initial={this.state.initial}
+                            /> : null
+                        }
+
+                        {
+                            this.getBannerEnable() && this.state.admobVisible && !this.state.transitionShowed ? <WooBanner /> : null
+                        }
+                    </> : null
+                }
+
+            </SafeAreaView>
     }
 }
 
