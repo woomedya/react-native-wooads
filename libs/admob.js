@@ -10,34 +10,100 @@ const AdRequest = firebase.admob.AdRequest;
 const request = new AdRequest();
 var interstitialAvaible = true;
 var interstitialShowable = true;
+var rewardAvaible = true;
 
 export var interstitialVisible = false;
+export var rewardVisible = false;
 
 export const setInterstitialShowable = (value) => {
     interstitialShowable = value;
 }
 
-export const interstitial = () => {
-    if (interstitialAvaible && config.admobInterstitialAppID) {
-        interstitialAvaible = false;
+export const interstitial = async () => {
+    return await new Promise(res => {
+        if (interstitialAvaible && config.admobInterstitialAppID) {
+            interstitialAvaible = false;
+            rewardAvaible = false;
 
-        const advert = firebase.admob().interstitial(config.admobInterstitialAppID);
-        const AdRequest = firebase.admob.AdRequest;
-        const request = new AdRequest();
+            const advert = firebase.admob().interstitial(config.admobInterstitialAppID);
+            const AdRequest = firebase.admob.AdRequest;
+            const request = new AdRequest();
 
-        advert.loadAd(request.build());
-        advert.on('onAdLoaded', () => {
-            if (interstitialShowable) {
-                interstitialVisible = true;
+            advert.loadAd(request.build());
+            advert.on('onAdLoaded', () => {
+                if (interstitialShowable) {
+                    interstitialVisible = true;
+                    advert.show();
+                    setTimeout(() => {
+                        interstitialVisible = false;
+                    }, 4000)
+                }
+            });
+
+            advert.on('onAdOpened', (error) => {
+                res('ok');
+            });
+
+            advert.on('onAdFailedToLoad', (error) => {
+                res('fail');
+            });
+
+            interstitialAvaible = true;
+            rewardAvaible = true;
+        } else {
+            res('fail');
+        }
+    });
+}
+
+export const reward = async () => {
+    return await new Promise(res => {
+        if (rewardAvaible && config.rewardedAppID) {
+            var returned = true;
+
+            interstitialAvaible = false;
+            rewardAvaible = false;
+
+            const advert = firebase.admob().rewarded(config.rewardedAppID);
+            const AdRequest = firebase.admob.AdRequest;
+            const request = new AdRequest();
+
+            advert.loadAd(request.build());
+            advert.on('onAdLoaded', () => {
+                rewardVisible = true;
                 advert.show();
                 setTimeout(() => {
-                    interstitialVisible = false;
+                    rewardVisible = false;
                 }, 4000)
-            }
-        });
+            });
 
-        interstitialAvaible = true;
-    }
+            advert.on('onRewarded', (event) => {
+                if (returned) {
+                    returned = false;
+                    res('ok');
+                }
+            });
+
+            advert.on('onAdClosed', (event) => {
+                if (returned) {
+                    returned = false;
+                    res('closed');
+                }
+            });
+
+            advert.on('onAdFailedToLoad', (error) => {
+                if (returned) {
+                    returned = false;
+                    res('fail');
+                }
+            });
+
+            interstitialAvaible = true;
+            rewardAvaible = true;
+        } else {
+            res('fail');
+        }
+    });
 }
 
 export default class Admob extends Component {

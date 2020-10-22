@@ -45,6 +45,7 @@ const baseRequest = async (url, type, obj) => {
         }, {
             ...obj
         });
+        console.log(obj, result);
         return result;
     } catch (error) {
         return null;
@@ -59,6 +60,22 @@ export const getApi = async (deviceId, locationCoordinate) => {
             deviceId: deviceId,
             screen: { width, height },
             version
+        }));
+        return responseJson;
+    } catch (error) {
+        return {};
+    }
+}
+
+export const getApiReward = async (deviceId, locationCoordinate) => {
+    try {
+        var responseJson = (await requestGetWooads({
+            applicationId: opts.applicationId,
+            coordinate: locationCoordinate,
+            deviceId: deviceId,
+            screen: { width, height },
+            version,
+            type: 'Reward'
         }));
         return responseJson;
     } catch (error) {

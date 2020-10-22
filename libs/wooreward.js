@@ -1,6 +1,6 @@
 import React, { Component, } from "react";
 import { View, SafeAreaView, StyleSheet, Text, Dimensions, Linking, Platform, StatusBar } from "react-native";
-import { getApi, setViewApi, setClickCountApi } from "./request";
+import { getApiReward, setViewApi, setClickCountApi } from "./request";
 import Modal from "react-native-modal";
 import { Button } from "react-native-elements";
 import { color } from "./color";
@@ -49,12 +49,13 @@ const reklam_ht = (aw, ah) => {
     return ht;
 }
 
-export default class WooTransition extends Component {
+export default class WooReward extends Component {
     constructor(props) {
         super(props)
         this.props = props;
 
         this.webview = null;
+        this.onReward = null;
 
         this.state = {
             isModalVisible: false,
@@ -65,13 +66,6 @@ export default class WooTransition extends Component {
         };
     }
 
-    componentDidMount = () => {
-        if (this.props.initial)
-            this.refresh();
-
-        this.setInfoVisible(false);
-    }
-
     componentWillUnmount() {
         clearInterval(this.clockCall);
     }
@@ -79,11 +73,9 @@ export default class WooTransition extends Component {
     onClose = (admob) => {
         if (this.props.onClose)
             this.props.onClose(admob);
-    }
 
-    setInfoVisible = (visible) => {
-        if (this.props.getInfoVisible)
-            this.props.getInfoVisible(visible);
+        if (!admob && this.onReward)
+            this.onReward();
     }
 
     getLocation = async () => {
@@ -106,23 +98,28 @@ export default class WooTransition extends Component {
         var locationCoordinate = await this.getLocation()
 
         var deviceId = await DeviceInfo.getUniqueId();
-        var data = await getApi(deviceId, locationCoordinate);
-        if (data) {
-            this.setState({
-                closeEnable: true,
-                timer: data.ads.duration == null ? 0 : data.ads.duration || 0,
-                ads: data.ads || {},
-                data,
-                isModalVisible: true,
-            }, () => {
-                this.setInfoVisible(true);
-            });
-        } else {
-            this.setState({ isModalVisible: false }, () => {
-                this.setInfoVisible(false);
-                this.onClose(true);
-            });
-        }
+        var data = await getApiReward(deviceId, locationCoordinate);
+
+        return await new Promise(res => {
+            if (data) {
+                this.setState({
+                    closeEnable: true,
+                    timer: data.ads.duration == null ? 0 : data.ads.duration || 0,
+                    ads: data.ads || {},
+                    data,
+                    isModalVisible: true,
+                });
+
+                this.onReward = () => {
+                    res('ok');
+                }
+            } else {
+                this.setState({ isModalVisible: false }, () => {
+                    this.onClose(true);
+                });
+                res('fail');
+            }
+        });
     }
 
     setNavigate = (event) => {
@@ -166,7 +163,6 @@ export default class WooTransition extends Component {
     closeModel = async () => {
         if (this.state.timer <= 0)
             this.setState({ isModalVisible: false }, () => {
-                this.setInfoVisible(false);
                 this.onClose();
             });
     }

@@ -12,10 +12,10 @@ export default class WooadsContainer extends Component {
         super(props)
         this.props = props;
 
-        this.wooads = null;
+        this.WooTransition = null;
 
         this.state = {
-            admobVisible: false,
+            bannerVisible: false,
             transitionShowed: false,
             enable: getAdsEnable(),
             pageEnable: getPageAdsEnable(this.props.page),
@@ -51,26 +51,25 @@ export default class WooadsContainer extends Component {
         if (this.state.enable && interstitialVisible == false) {
             setInterstitialShowable(this.getTransitionEnable());
             this.setState({
-                admobVisible: this.getBannerEnable()
+                bannerVisible: this.getBannerEnable()
             }, () => {
-                if (this.state.initial && this.wooads && this.wooads.refresh)
-                    this.wooads.refresh();
+                if (this.state.initial && this.WooTransition && this.WooTransition.refresh)
+                    this.WooTransition.refresh();
             });
         }
         if (this.state.enable && interstitialVisible == true) {
             this.setState({
-                admobVisible: false
+                bannerVisible: false
             }, () => {
-                if (this.state.initial && this.wooads && this.wooads.refresh)
-                    this.wooads.refresh();
+                if (this.state.initial && this.WooTransition && this.WooTransition.refresh)
+                    this.WooTransition.refresh();
             });
         }
-
     }
 
     closeWooTransition = (admobInterstitial) => {
         this.setState({
-            admobVisible: true
+            bannerVisible: true
         }, () => {
             setInterstitialShowable(true);
             if (admobInterstitial) interstitial();
@@ -102,7 +101,7 @@ export default class WooadsContainer extends Component {
                 this.state.enable ? <>
                     {
                         this.getTransitionEnable() ? <WooTransition
-                            ref={ref => this.wooads = ref}
+                            ref={ref => this.WooTransition = ref}
                             onClose={this.closeWooTransition}
                             getInfoVisible={this.getInfoVisibleTransition}
                             initial={this.state.initial}
@@ -110,7 +109,7 @@ export default class WooadsContainer extends Component {
                     }
 
                     {
-                        this.getBannerEnable() && this.state.admobVisible && !this.state.transitionShowed ? <WooBanner /> : null
+                        this.getBannerEnable() && this.state.bannerVisible && !this.state.transitionShowed ? <WooBanner /> : null
                     }
                 </> : null
             }
@@ -123,7 +122,7 @@ export default class WooadsContainer extends Component {
                     this.state.enable ? <>
                         {
                             this.getTransitionEnable() ? <WooTransition
-                                ref={ref => this.wooads = ref}
+                                ref={ref => this.WooTransition = ref}
                                 onClose={this.closeWooTransition}
                                 getInfoVisible={this.getInfoVisibleTransition}
                                 initial={this.state.initial}
@@ -131,7 +130,7 @@ export default class WooadsContainer extends Component {
                         }
 
                         {
-                            this.getBannerEnable() && this.state.admobVisible && !this.state.transitionShowed ? <WooBanner /> : null
+                            this.getBannerEnable() && this.state.bannerVisible && !this.state.transitionShowed ? <WooBanner /> : null
                         }
                     </> : null
                 }

@@ -1,10 +1,11 @@
 import opts from './config';
 import container from './libs/container';
+import rewardcontainer from './libs/rewardcontainer';
 import * as enableStore from './libs/enablestore';
 
 export const config = ({
     serverUrl, publicKey, privateKey, applicationId, tokenTimeout,
-    admobBannerAppID, admobInterstitialAppID, admobNativeAppID,
+    admobBannerAppID, admobInterstitialAppID, admobNativeAppID, rewardedAppID,
     enable, pages
 }) => {
     opts.serverUrl = serverUrl;
@@ -15,6 +16,7 @@ export const config = ({
     opts.admobBannerAppID = admobBannerAppID;
     opts.admobInterstitialAppID = admobInterstitialAppID;
     opts.admobNativeAppID = admobNativeAppID;
+    opts.rewardedAppID = rewardedAppID;
 
     if (tokenTimeout != null)
         opts.tokenTimeout = tokenTimeout;
@@ -30,5 +32,7 @@ export const setEnable = value => {
 export const setPageEnable = pages => {
     enableStore.setPageAdsEnable(pages);
 }
+
+export const WooadsRewardContainer = rewardcontainer;
 
 export default container;
