@@ -45,7 +45,7 @@ const baseRequest = async (url, type, obj) => {
         }, {
             ...obj
         });
-        console.log(obj, result);
+
         return result;
     } catch (error) {
         return null;
