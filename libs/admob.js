@@ -75,7 +75,7 @@ export const reward = async () => {
                         returned = false;
                         res('ok');
                     }
-                } else {
+                } else if (type != AdEventType.OPENED) {
                     if (returned) {
                         returned = false;
                         res('closed');
