@@ -1,13 +1,9 @@
 import React, { Component } from "react";
 import { View } from "react-native";
-const firebase = require('react-native-firebase');
 import config from '../config';
+import { InterstitialAd, AdEventType, RewardedAd, RewardedAdEventType, BannerAd, BannerAdSize, } from '@react-native-firebase/admob';
 
 
-const Banner = firebase.admob.Banner;
-const NativeExpress = firebase.admob.NativeExpress;
-const AdRequest = firebase.admob.AdRequest;
-const request = new AdRequest();
 var interstitialAvaible = true;
 var interstitialShowable = true;
 var rewardAvaible = true;
@@ -24,28 +20,23 @@ export const interstitial = async () => {
         if (interstitialAvaible && config.admobInterstitialAppID) {
             interstitialAvaible = false;
             rewardAvaible = false;
+            const advert = InterstitialAd.createForAdRequest(config.admobInterstitialAppID);
 
-            const advert = firebase.admob().interstitial(config.admobInterstitialAppID);
-            const AdRequest = firebase.admob.AdRequest;
-            const request = new AdRequest();
-
-            advert.loadAd(request.build());
-            advert.on('onAdLoaded', () => {
-                if (interstitialShowable) {
-                    interstitialVisible = true;
-                    advert.show();
-                    setTimeout(() => {
-                        interstitialVisible = false;
-                    }, 4000)
+            advert.load();
+            advert.onAdEvent((type) => {
+                if (type === AdEventType.LOADED) {
+                    if (interstitialShowable) {
+                        interstitialVisible = true;
+                        advert.show();
+                        setTimeout(() => {
+                            interstitialVisible = false;
+                        }, 4000)
+                    }
+                } else if (type === AdEventType.OPENED) {
+                    res('ok');
+                } else if (type === AdEventType.ERROR) {
+                    res('fail');
                 }
-            });
-
-            advert.on('onAdOpened', (error) => {
-                res('ok');
-            });
-
-            advert.on('onAdFailedToLoad', (error) => {
-                res('fail');
             });
 
             interstitialAvaible = true;
@@ -64,37 +55,31 @@ export const reward = async () => {
             interstitialAvaible = false;
             rewardAvaible = false;
 
-            const advert = firebase.admob().rewarded(config.rewardedAppID);
-            const AdRequest = firebase.admob.AdRequest;
-            const request = new AdRequest();
+            const advert = RewardedAd.createForAdRequest(config.rewardedAppID);
 
-            advert.loadAd(request.build());
-            advert.on('onAdLoaded', () => {
-                rewardVisible = true;
-                advert.show();
-                setTimeout(() => {
-                    rewardVisible = false;
-                }, 4000)
-            });
-
-            advert.on('onRewarded', (event) => {
-                if (returned) {
-                    returned = false;
-                    res('ok');
-                }
-            });
-
-            advert.on('onAdClosed', (event) => {
-                if (returned) {
-                    returned = false;
-                    res('closed');
-                }
-            });
-
-            advert.on('onAdFailedToLoad', (error) => {
-                if (returned) {
-                    returned = false;
-                    res('fail');
+            advert.load();
+            advert.onAdEvent((type, error, reward) => {
+                if (type === RewardedAdEventType.LOADED) {
+                    rewardVisible = true;
+                    advert.show();
+                    setTimeout(() => {
+                        rewardVisible = false;
+                    }, 4000)
+                } else if (error) {
+                    if (returned) {
+                        returned = false;
+                        res('fail');
+                    }
+                } else if (type === RewardedAdEventType.EARNED_REWARD) {
+                    if (returned) {
+                        returned = false;
+                        res('ok');
+                    }
+                } else {
+                    if (returned) {
+                        returned = false;
+                        res('closed');
+                    }
                 }
             });
 
@@ -113,25 +98,11 @@ export default class Admob extends Component {
     }
 
     renderElement() {
-        if (this.props.type == "banner") {
-            return <Banner
-                unitId={config.admobBannerAppID}
-                size={'SMART_BANNER'}
-                request={request.build()}
-            />;
-        } else if (this.props.type == "native") {
-            return <NativeExpress
-                size={"300x400"}
-                unitId={config.admobNativeAppID}
-                request={request.build()}
-            />
-        } else {
-            return <Banner
-                unitId={config.admobBannerAppID}
-                size={this.props.type}
-                request={request.build()}
-            />;
-        }
+        return <BannerAd
+            unitId={config.admobBannerAppID}
+            size={BannerAdSize.SMART_BANNER}
+        />
+
     }
 
     render() {
