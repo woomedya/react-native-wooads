@@ -37,10 +37,11 @@ export const interstitial = async () => {
                 } else if (type === AdEventType.ERROR) {
                     res('fail');
                 }
+
+                interstitialAvaible = true;
+                rewardAvaible = true;
             });
 
-            interstitialAvaible = true;
-            rewardAvaible = true;
         } else {
             res('fail');
         }
@@ -81,10 +82,10 @@ export const reward = async () => {
                         res('closed');
                     }
                 }
-            });
 
-            interstitialAvaible = true;
-            rewardAvaible = true;
+                interstitialAvaible = true;
+                rewardAvaible = true;
+            });
         } else {
             res('fail');
         }

@@ -72,7 +72,7 @@ export default class WooBanner extends Component {
                 setCoordinate(locationCoordinate);
             },
             error => console.log(JSON.stringify(error)),
-            { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 },
+            { enableHighAccuracy: false, timeout: 20000, maximumAge: 1000 },
         );
     }
 
