@@ -98,8 +98,15 @@ export default class Admob extends Component {
         this.props = props;
     }
 
+    onError = (error) => {
+        console.log(error);
+        if (this.props.onError)
+            this.props.onError(error);
+    }
+
     renderElement() {
         return <BannerAd
+            onAdFailedToLoad={this.onError}
             unitId={config.admobBannerAppID}
             size={BannerAdSize.SMART_BANNER}
         />

@@ -52,7 +52,8 @@ export default class WooBanner extends Component {
             data: {},
             ads: {},
             woo: false,
-            dataDownloaded: false
+            dataDownloaded: false,
+            admobError: false
         };
     }
 
@@ -81,7 +82,9 @@ export default class WooBanner extends Component {
 
         var deviceId = await DeviceInfo.getUniqueId();
         var data = await getApiBanner(deviceId, locationCoordinate);
-        if (data) {
+
+        console.log('woo', data);
+        if (data && data.ads) {
             this.setState({
                 dataDownloaded: true,
                 woo: true,
@@ -91,7 +94,7 @@ export default class WooBanner extends Component {
         } else {
             this.setState({
                 dataDownloaded: true,
-                woo: true
+                woo: false
             })
         }
     }
@@ -115,8 +118,16 @@ export default class WooBanner extends Component {
         this.setView();
     }
 
+    onError = (err) => {
+        this.setState({ ads: {}, woo: false });
+    }
+
     onMessage = (e) => {
         this.setClick();
+    }
+
+    onAdmobError = (err) => {
+        this.setState({ admobError: true });
     }
 
     getHTML = (html, width, height) => {
@@ -188,7 +199,7 @@ export default class WooBanner extends Component {
                         onNavigationStateChange={this.setNavigate}
                         onMessage={this.onMessage}
                     />
-                </View> : <Admob type={"banner"}></Admob>
+                </View> : this.state.admobError ? null : <Admob onError={this.onAdmobError} type={"banner"}></Admob>
         ) : null
     }
 }

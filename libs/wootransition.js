@@ -107,18 +107,18 @@ export default class WooTransition extends Component {
 
         var deviceId = await DeviceInfo.getUniqueId();
         var data = await getApi(deviceId, locationCoordinate);
-        if (data) {
+        if (data && data.ads) {
             this.setState({
                 closeEnable: true,
                 timer: data.ads.duration == null ? 0 : data.ads.duration || 0,
-                ads: data.ads || {},
+                ads: data.ads,
                 data,
                 isModalVisible: true,
             }, () => {
                 this.setInfoVisible(true);
             });
         } else {
-            this.setState({ isModalVisible: false }, () => {
+            this.setState({ isModalVisible: false, closeEnable: false, ads: {} }, () => {
                 this.setInfoVisible(false);
                 this.onClose(true);
             });
@@ -165,7 +165,7 @@ export default class WooTransition extends Component {
 
     closeModel = async () => {
         if (this.state.timer <= 0)
-            this.setState({ isModalVisible: false }, () => {
+            this.setState({ ads: {}, isModalVisible: false, closeEnable: false }, () => {
                 this.setInfoVisible(false);
                 this.onClose();
             });
@@ -173,7 +173,7 @@ export default class WooTransition extends Component {
 
     onError = (err) => {
         clearInterval(this.clockCall);
-        this.setState({ closeEnable: false })
+        this.setState({ ads: {}, isModalVisible: false, closeEnable: false })
     }
 
     onMessage = (e) => {

@@ -48,7 +48,7 @@ export default class WooadsContainer extends Component {
     }
 
     refresh = async () => {
-        if (this.state.enable && interstitialVisible == false) {
+        if (this.state.enable) {
             setInterstitialShowable(this.getTransitionEnable());
             this.setState({
                 bannerVisible: this.getBannerEnable()
@@ -57,23 +57,11 @@ export default class WooadsContainer extends Component {
                     this.WooTransition.refresh();
             });
         }
-        if (this.state.enable && interstitialVisible == true) {
-            this.setState({
-                bannerVisible: false
-            }, () => {
-                if (this.state.initial && this.WooTransition && this.WooTransition.refresh)
-                    this.WooTransition.refresh();
-            });
-        }
     }
 
     closeWooTransition = (admobInterstitial) => {
-        this.setState({
-            bannerVisible: true
-        }, () => {
-            setInterstitialShowable(true);
-            if (admobInterstitial) interstitial();
-        });
+        setInterstitialShowable(true);
+        if (admobInterstitial) interstitial();
     }
 
     getBannerEnable = () => {
@@ -93,7 +81,7 @@ export default class WooadsContainer extends Component {
     }
 
     render() {
-        return this.props.views == "safe" ? <View style={[styles.container, this.props.style]} forceInset={{ top: 'never' }}>
+        return <View style={[styles.container, this.props.style]} forceInset={{ top: 'never' }}>
 
             {this.props.children}
 
@@ -109,33 +97,12 @@ export default class WooadsContainer extends Component {
                     }
 
                     {
-                        this.getBannerEnable() && this.state.bannerVisible && !this.state.transitionShowed ? <WooBanner /> : null
+                        this.getBannerEnable() && this.state.bannerVisible ? <WooBanner /> : null
                     }
                 </> : null
             }
 
-        </View> : <SafeAreaView style={[styles.container, this.props.style]} forceInset={{ top: 'never' }}>
-
-                {this.props.children}
-
-                {
-                    this.state.enable ? <>
-                        {
-                            this.getTransitionEnable() ? <WooTransition
-                                ref={ref => this.WooTransition = ref}
-                                onClose={this.closeWooTransition}
-                                getInfoVisible={this.getInfoVisibleTransition}
-                                initial={this.state.initial}
-                            /> : null
-                        }
-
-                        {
-                            this.getBannerEnable() && this.state.bannerVisible && !this.state.transitionShowed ? <WooBanner /> : null
-                        }
-                    </> : null
-                }
-
-            </SafeAreaView>
+        </View>
     }
 }
 
