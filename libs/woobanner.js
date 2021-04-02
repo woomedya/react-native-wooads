@@ -83,7 +83,6 @@ export default class WooBanner extends Component {
         var deviceId = await DeviceInfo.getUniqueId();
         var data = await getApiBanner(deviceId, locationCoordinate);
 
-        console.log('woo', data);
         if (data && data.ads) {
             this.setState({
                 dataDownloaded: true,
