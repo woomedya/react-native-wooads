@@ -62,7 +62,6 @@ export default class Stream extends React.Component {
     }
 
     volumeChange = (volume) => {
-        console.log(volume)
         this.setState({ volume })
     }
 

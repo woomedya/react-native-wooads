@@ -99,7 +99,6 @@ export default class Admob extends Component {
     }
 
     onError = (error) => {
-        console.log(error);
         if (this.props.onError)
             this.props.onError(error);
     }
