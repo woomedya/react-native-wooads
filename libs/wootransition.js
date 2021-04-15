@@ -210,8 +210,8 @@ export default class WooTransition extends Component {
     }
 
     render() {
-        return this.state.ads.id ? <SafeAreaView style={styles.view}>
-            <Modal isVisible={this.state.isModalVisible}>
+        return this.state.ads.id && this.state.isModalVisible ? <SafeAreaView style={styles.view}>
+            <View style={styles.root}>
                 <SafeAreaView style={[styles.modal, {
                     width: reklam_wd(this.state.ads.width, this.state.ads.height),
                     height: reklam_ht(this.state.ads.width, this.state.ads.height),
@@ -265,7 +265,7 @@ export default class WooTransition extends Component {
                         />
                     </View>
                 </SafeAreaView>
-            </Modal>
+            </View>
         </SafeAreaView> : null
     }
 }
@@ -275,6 +275,19 @@ const styles = StyleSheet.create({
         position: "absolute",
         flex: 1,
         backgroundColor: "#fff",
+        zIndex: 1000,
+        elevation: 1000,
+        backgroundColor: '#00000080',
+        top: 0,
+        bottom: 0,
+        right: 0,
+        left: 0
+    },
+    root: {
+        flex: 1,
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'space-around',
     },
     modal: {
         alignSelf: "center",
