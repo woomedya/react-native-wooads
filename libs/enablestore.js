@@ -21,12 +21,15 @@ export const setPageAdsEnable = (pages) => {
 }
 
 export const getPageAdsEnable = (pageKey) => {
-    var enable = getAdsEnable();
     var pages = store.get('pages');
 
     return pages[pageKey] || {
-        banner: enable,
-        transition: enable
+        banner: false,
+        transition: false,
+        admob: {
+            banner: false,
+            transition: false
+        }
     };
 }
 

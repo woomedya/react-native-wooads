@@ -1,6 +1,5 @@
-import React, { Component, } from "react";
-import { StyleSheet, View, Linking, Platform, StatusBar, Dimensions } from "react-native";
-import Admob from './admob';
+import React, { Component } from "react";
+import { StyleSheet, View, Linking, Platform, StatusBar, Dimensions, AppState } from "react-native";
 import { getApiBanner, setViewApi, setClickCountApi } from "./request";
 import { color } from "./color";
 import DeviceInfo from 'react-native-device-info';
@@ -38,7 +37,7 @@ const reklam_ht = (aw, ah) => {
     aw = Number(aw);
     ah = Number(ah);
     ht = stretchByDimension(aw, ah, width, height).height
-    return ht;
+    return ht + (Platform.OS == 'android' ? StatusBar.currentHeight : 0);
 }
 
 export default class WooBanner extends Component {
@@ -52,13 +51,33 @@ export default class WooBanner extends Component {
             data: {},
             ads: {},
             woo: false,
-            dataDownloaded: false,
-            admobError: false
+            dataDownloaded: false
         };
+
+        this.durationTimeout = null;
+        this.durationTime = 0;
+        this.keyCounter = 0;
+        this.appState = AppState.currentState;
     }
 
     componentDidMount = () => {
         this.refresh();
+
+        AppState.addEventListener("change", this.appStateChanged);
+    }
+
+    componentWillUnmount = () => {
+        this.clearDurationTimeout();
+
+        AppState.removeEventListener("change", this.appStateChanged);
+    }
+
+    appStateChanged = nextAppState => {
+        if (this.appState.match(/inactive|background/) && nextAppState === "active")
+            this.setDurationTimeout(this.durationTime);
+        else
+            this.clearDurationTimeout();
+        this.appState = nextAppState;
     }
 
     getLocation = async () => {
@@ -69,12 +88,32 @@ export default class WooBanner extends Component {
     setLocation = () => {
         Geolocation.getCurrentPosition(
             position => {
-                locationCoordinate = { 'latitude': position.coords.latitude, 'longitude': position.coords.longitude }
+                let locationCoordinate = { 'latitude': position.coords.latitude, 'longitude': position.coords.longitude }
                 setCoordinate(locationCoordinate);
             },
             error => console.log(JSON.stringify(error)),
             { enableHighAccuracy: false, timeout: 20000, maximumAge: 1000 },
         );
+    }
+
+    setDurationTimeout = (duration) => {
+        if (duration) {
+            this.durationTime = duration;
+
+            this.clearDurationTimeout();
+
+            this.durationTimeout = setTimeout(() => {
+                if (this.durationTimeout && this.appState === "active")
+                    this.refresh();
+            }, duration * 1000);
+        }
+    }
+
+    clearDurationTimeout = () => {
+        if (this.durationTimeout != null) {
+            clearTimeout(this.durationTimeout);
+            this.durationTimeout = null;
+        }
     }
 
     refresh = async () => {
@@ -85,15 +124,20 @@ export default class WooBanner extends Component {
 
         if (data && data.ads) {
             this.setState({
+                key: data.ads.id + (this.keyCounter++),
                 dataDownloaded: true,
                 woo: true,
                 ads: data.ads,
                 data,
             });
+            if (data.ads.duration)
+                this.setDurationTimeout(data.ads.duration);
         } else {
             this.setState({
                 dataDownloaded: true,
                 woo: false
+            }, () => {
+                this.onClose(true);
             })
         }
     }
@@ -125,8 +169,9 @@ export default class WooBanner extends Component {
         this.setClick();
     }
 
-    onAdmobError = (err) => {
-        this.setState({ admobError: true });
+    onClose = (admob) => {
+        if (this.props.onClose)
+            this.props.onClose(admob);
     }
 
     getHTML = (html, width, height) => {
@@ -166,7 +211,7 @@ export default class WooBanner extends Component {
                     height: reklam_ht(this.state.ads.width, this.state.ads.height),
                 }]}>
                     <WebView
-                        key={this.state.ads.id}
+                        key={this.state.key}
                         originWhitelist={['*']}
                         style={[styles.webViewStyle, {
                             width: reklam_wd(this.state.ads.width, this.state.ads.height),
@@ -198,7 +243,7 @@ export default class WooBanner extends Component {
                         onNavigationStateChange={this.setNavigate}
                         onMessage={this.onMessage}
                     />
-                </View> : this.state.admobError ? null : <Admob onError={this.onAdmobError} type={"banner"}></Admob>
+                </View> : null
         ) : null
     }
 }

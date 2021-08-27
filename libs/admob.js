@@ -92,7 +92,7 @@ export const reward = async () => {
     });
 }
 
-export default class Admob extends Component {
+export class Banner extends Component {
     constructor(props) {
         super(props)
         this.props = props;
@@ -103,21 +103,14 @@ export default class Admob extends Component {
             this.props.onError(error);
     }
 
-    renderElement() {
-        return <BannerAd
-            onAdFailedToLoad={this.onError}
-            unitId={config.admobBannerAppID}
-            size={BannerAdSize.SMART_BANNER}
-        />
-
-    }
-
     render() {
-        return (
-            <View style={{ alignItems: 'center' }} >
-                {this.renderElement()}
-            </View>
-        );
+        return <View style={{ alignItems: 'center' }} >
+            <BannerAd
+                onAdFailedToLoad={this.onError}
+                unitId={config.admobBannerAppID}
+                size={BannerAdSize.SMART_BANNER}
+            />
+        </View>
     }
 }
 

@@ -38,7 +38,7 @@ export default class WooadsRewardContainer extends Component {
                 />
 
             </View> :
-            <SafeAreaView style={[styles.container, this.props.style]} forceInset={{ top: 'never' }}>
+            <View style={[styles.container, this.props.style]} forceInset={{ top: 'never' }}>
 
                 {this.props.children}
 
@@ -47,7 +47,7 @@ export default class WooadsRewardContainer extends Component {
                     onClose={this.closeWooReward}
                 />
 
-            </SafeAreaView>
+            </View>
     }
 }
 
