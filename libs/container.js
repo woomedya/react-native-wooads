@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-navigation';
 import WooTransition from './wootransition';
 import { Banner as AdmobBanner, interstitial, setInterstitialShowable } from './admob';
 import enablestore, { getAdsEnable, getPageAdsEnable } from './enablestore';
